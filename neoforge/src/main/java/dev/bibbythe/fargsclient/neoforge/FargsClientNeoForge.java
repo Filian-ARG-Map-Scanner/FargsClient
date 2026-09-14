@@ -12,6 +12,7 @@ import net.neoforged.fml.loading.FMLPaths;
 public final class FargsClientNeoForge {
     public FargsClientNeoForge(ModContainer container) {
         Sentry.init(options -> {
+            options.setDebug(true);
             options.setDsn("https://dae1d1b92cd43f5d9ed93118138de1c0@sentry.bibbythe.dev/4");
             options.setEnvironment("neoforge");
             // Add data like request headers and IP for users,
