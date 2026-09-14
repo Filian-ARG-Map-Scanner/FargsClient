@@ -36,12 +36,16 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}}
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: $${{secrets.SENTRY_PROJECT}}
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: "fargs-client"
+          SENTRY_PROJECT: $${{secrets.SENTRY_PROJECT}}
         with:
           environment: production
           release: ${{steps.version_step.outputs.fullSemVer}}
