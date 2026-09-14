@@ -1,4 +1,4 @@
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 label: "{BranchName}"
 increment: Inherit
 prevent-increment:
