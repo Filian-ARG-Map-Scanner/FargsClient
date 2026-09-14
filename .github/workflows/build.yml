@@ -32,6 +32,8 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}}
       - name: Create Sentry release
