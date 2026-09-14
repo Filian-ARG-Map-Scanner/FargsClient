@@ -30,10 +30,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v6
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v6
       - name: Build with Gradle
         run: ./gradlew build -Dmod_version=${{steps.version_step.outputs.fullSemVer}}
       - name: Create Sentry release
