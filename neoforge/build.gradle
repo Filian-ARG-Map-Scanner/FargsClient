@@ -30,7 +30,7 @@ sentry {
     // code as part of your stack traces in Sentry.
     //
     // Default is disabled.
-    includeSourceContext = true
+    includeSourceContext = CI == "true"
 
     // Includes additional source directories into the source bundle.
     // These directories are resolved relative to the project directory.
@@ -63,8 +63,8 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
     include "com.rabbitmq:amqp-client:5.33.0"
     include "org.yaml:snakeyaml:2.7"
-    include "io.sentry:sentry"
-    include "io.sentry:sentry-log4j2"
+    include "io.sentry:sentry:6.28.0"
+    include "io.sentry:sentry-log4j2:6.28.0"
 }
 
 processResources {
