@@ -41,26 +41,16 @@ dependencies {
     include "io.sentry:sentry-log4j2:6.28.0"
 }
 
-
-sourcesJar.configure {
-    mustRunAfter(generateSentryDebugMetaPropertiesjava, collectExternalDependenciesForSentry)
-}
-
-sentry {
-    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-    // This enables source context, allowing you to see your source
-    // code as part of your stack traces in Sentry.
-    //
-    // Default is disabled.
-    includeSourceContext = CI == "true"
-
-    // Includes additional source directories into the source bundle.
-    // These directories are resolved relative to the project directory.
-    additionalSourceDirsForSourceContext = ["../common/src/main/java"]
-
-    org = System.getenv("SENTRY_ORG")
-    projectName = System.getenv("SENTRY_PROJECT")
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+tasks.named('processResources') {
+    inputs.property 'uuid', fabric_bundle_uuid
+    doLast {
+        File file = layout.projectDirectory.file('build/resources/main/sentry-dif-id').asFile
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile()
+        file.write(inputs.properties.uuid as String)
+    }
 }
 
 processResources {

@@ -30,16 +30,32 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21
+      - name: UUID Action
+        uses: filipstefansson/uuid-action@v1.1
+        id: fabric_bundle_uuid
+
+      - name: UUID Action
+        uses: filipstefansson/uuid-action@v1.1
+        id: neoforge_bundle_uuid
+
+      - name: Setup Sentry CLI
+        uses: matbour/setup-sentry-cli@v3.0.0
+        id: sentry_setup
+      - name: Create Debug Info File
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: |
+          sentry-cli debug-files bundle-jvm --output fabric/build/generated/sentry --debug-id ${{ steps.fabric_bundle_uuid.outputs.uuid }} common/src/main/java fabric/src/main/java
+          sentry-cli debug-files bundle-jvm --output neoforge/build/generated/sentry --debug-id ${{ steps.neoforge_bundle_uuid.outputs.uuid }} common/src/main/java neoforge/src/main/java
+          sentry-cli debug-files upload --type jvm neoforge/build/generated/sentry fabric/build/generated/sentry
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Build with Gradle
-        run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}} -PCI=true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}} -Pfabric_bundle_uuid=${{ steps.fabric_bundle_uuid.outputs.uuid }} -Pneoforge_bundle_uuid=${{ steps.neoforge_bundle_uuid.outputs.uuid }}
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
