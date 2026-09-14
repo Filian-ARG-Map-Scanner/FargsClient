@@ -54,16 +54,16 @@ jobs:
         with:
           environment: production
           release: ${{steps.version_step.outputs.fullSemVer}}
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v7
+      - name: Create tag
+        uses: actions/github-script@v5
         with:
-          name: v${{steps.version_step.outputs.fullSemVer}}
-          path: build/libs/fargs-client-*-${{steps.version_step.outputs.fullSemVer}}.jar
-      - name: Tag commit
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v${{steps.version_step.outputs.fullSemVer}}"
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{steps.version_step.outputs.fullSemVer}}',
+              sha: context.sha
+            })
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
