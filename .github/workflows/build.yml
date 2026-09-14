@@ -24,7 +24,7 @@ jobs:
         id: version_step # step id used as reference for output values
         uses: gittools/actions/gitversion/execute@v4.7.0
       - name: Set Version
-        run: echo "VERSION=${{ steps.version_step.outputs.FullSemVer }}" >> $GITHUB_ENV
+        run: echo "VERSION=${{ steps.version_step.outputs.semVer }}" >> $GITHUB_ENV
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
