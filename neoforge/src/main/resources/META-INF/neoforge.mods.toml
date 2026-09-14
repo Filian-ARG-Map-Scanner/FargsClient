@@ -4,7 +4,7 @@ loaderVersion = "[1,)"
 license = "Insert License Here"
 
 [[mods]]
-modId = "fargs-client"
+modId = "fargs_client"
 version = "${version}"
 displayName = "FARGS-Client"
 authors = "Me!"
@@ -13,21 +13,21 @@ This is an example description! Tell everyone what your mod is about!
 '''
 #logoFile = ""
 
-[[dependencies.fargs-client]]
+[[dependencies.fargs_client]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.11,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.fargs-client]]
+[[dependencies.fargs_client]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21.11,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.fargs-client]]
+[[dependencies.fargs_client]]
 modId = "architectury"
 type = "required"
 versionRange = "[19.0.1,)"

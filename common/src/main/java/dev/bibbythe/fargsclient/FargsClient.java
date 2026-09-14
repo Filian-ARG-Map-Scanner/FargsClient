@@ -8,7 +8,7 @@ import io.sentry.protocol.User;
 import java.nio.file.Path;
 
 public final class FargsClient {
-    public static final String MOD_ID = "fargs-client";
+    public static final String MOD_ID = "fargs_client";
     public static Logger LOGGER = new Logger();
     public static Config config;
     public static CommsManager commsManager;

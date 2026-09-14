@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "fargs-client",
+  "id": "fargs_client",
   "version": "${version}",
   "name": "FARGS-Client",
   "description": "This is an example description! Tell everyone what your mod is about!",
