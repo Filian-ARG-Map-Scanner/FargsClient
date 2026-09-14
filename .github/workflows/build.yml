@@ -35,7 +35,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Build with Gradle
-        run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}} -PCI=${{ci}}
+        run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}} -PCI=$CI
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
