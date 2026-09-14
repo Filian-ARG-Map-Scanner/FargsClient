@@ -46,7 +46,7 @@ jobs:
           environment: production
           release: ${{steps.version_step.outputs.fullSemVer}}
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: v${{steps.version_step.outputs.fullSemVer}}
           path: build/libs/fargs-client-*-${{steps.version_step.outputs.fullSemVer}}.jar
