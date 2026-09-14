@@ -37,6 +37,8 @@ dependencies {
 
     include "com.rabbitmq:amqp-client:5.33.0"
     include "org.yaml:snakeyaml:2.7"
+    include "io.sentry:sentry"
+    include "io.sentry:sentry-log4j2"
 }
 
 
