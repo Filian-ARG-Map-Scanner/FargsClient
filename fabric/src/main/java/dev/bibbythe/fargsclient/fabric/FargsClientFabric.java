@@ -12,6 +12,8 @@ public final class FargsClientFabric implements ClientModInitializer {
             // Add data like request headers and IP for users,
             // see https://docs.sentry.io/platforms/java/data-management/data-collected/ for more info
             options.setSendDefaultPii(false);
+            if (FabricLoader.getInstance().getModContainer("fargsclient").isPresent())
+                options.setRelease(FabricLoader.getInstance().getModContainer("fargsclient").get().getMetadata().getVersion().toString());
         });
     }
     @Override
