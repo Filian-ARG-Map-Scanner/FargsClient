@@ -35,7 +35,7 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v6
       - name: Build with Gradle
-        run: ./gradlew build -Dmod_version=${{steps.version_step.outputs.fullSemVer}}
+        run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}}
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
