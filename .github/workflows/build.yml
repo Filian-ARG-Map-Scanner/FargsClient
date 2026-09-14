@@ -39,13 +39,13 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: $${{vars.SENTRY_PROJECT}}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: $${{vars.SENTRY_PROJECT}}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
         with:
           environment: production
           release: ${{steps.version_step.outputs.fullSemVer}}
