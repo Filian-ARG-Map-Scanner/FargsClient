@@ -12,7 +12,8 @@ import net.neoforged.fml.loading.FMLPaths;
 public final class FargsClientNeoForge {
     public FargsClientNeoForge(ModContainer container) {
         Sentry.init(options -> {
-            options.setDsn("https://991b96ebe502771ad32908d09b524506@sentry.bibbythe.dev/5");
+            options.setDsn("https://dae1d1b92cd43f5d9ed93118138de1c0@sentry.bibbythe.dev/4");
+            options.setEnvironment("neoforge");
             // Add data like request headers and IP for users,
             // see https://docs.sentry.io/platforms/java/data-management/data-collected/ for more info
             options.setSendDefaultPii(false);

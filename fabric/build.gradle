@@ -57,7 +57,7 @@ sentry {
     additionalSourceDirsForSourceContext = ["../common/src/main/java"]
 
     org = "filian-arg"
-    projectName = "fargs-client-fabric"
+    projectName = "fargs-client"
     authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
