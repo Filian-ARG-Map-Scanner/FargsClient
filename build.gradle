@@ -2,6 +2,7 @@ plugins {
     id 'dev.architectury.loom' version '1.17-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.5-SNAPSHOT'
     id 'com.gradleup.shadow' version '9.4.3' apply false
+    id "io.sentry.jvm.gradle" version "3.12.0"
 }
 
 architectury {
@@ -13,10 +14,12 @@ allprojects {
     version = rootProject.mod_version
 }
 
+
 subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
+    apply plugin: 'io.sentry.jvm.gradle'
 
     base {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
@@ -39,9 +42,7 @@ subprojects {
         }
 
         implementation "com.rabbitmq:amqp-client:5.33.0"
-        include "com.rabbitmq:amqp-client:5.33.0"
         implementation "org.yaml:snakeyaml:2.7"
-        include "org.yaml:snakeyaml:2.7"
 
     }
 

@@ -22,7 +22,7 @@ public class CommsDirectPub {
     }
 
     public void publish(String routingKey, String message) throws IOException {
-        FargsClient.LOGGER.debug("Publishing message to {} with routing key {}", FargsClient.config.directExchangeName, routingKey);
+        FargsClient.LOGGER.debug("Publishing message to " + FargsClient.config.directExchangeName + " with routing key " + routingKey);
         rabbitmqChannel.basicPublish(FargsClient.config.directExchangeName, routingKey, null, message.getBytes());
     }
 }

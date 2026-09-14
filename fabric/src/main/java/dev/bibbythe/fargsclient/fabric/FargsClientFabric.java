@@ -1,11 +1,19 @@
 package dev.bibbythe.fargsclient.fabric;
 
 import dev.bibbythe.fargsclient.FargsClient;
+import io.sentry.Sentry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.LoggerFactory;
 
 public final class FargsClientFabric implements ClientModInitializer {
+    public FargsClientFabric() {
+        Sentry.init(options -> {
+            options.setDsn("https://dae1d1b92cd43f5d9ed93118138de1c0@sentry.bibbythe.dev/4");
+            // Add data like request headers and IP for users,
+            // see https://docs.sentry.io/platforms/java/data-management/data-collected/ for more info
+            options.setSendDefaultPii(false);
+        });
+    }
     @Override
     public void onInitializeClient() {
         FargsClient.init(FabricLoader.getInstance().getConfigDir());

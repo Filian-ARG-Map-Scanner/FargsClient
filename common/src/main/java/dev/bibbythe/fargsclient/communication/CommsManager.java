@@ -7,6 +7,7 @@ import dev.bibbythe.fargsclient.FargsClient;
 import dev.bibbythe.fargsclient.communication.types.Message;
 import dev.bibbythe.fargsclient.communication.types.MessageType;
 import dev.bibbythe.fargsclient.events.CommunicationEvents;
+import io.sentry.Sentry;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class CommsManager {
     CommsConnection connection;
     CommsManager instance;
-    UUID clientId;
+    String clientId;
     public CommsManager() {
         try {
             connection = new CommsConnectionBuilder()
@@ -25,6 +26,7 @@ public class CommsManager {
                     .password(FargsClient.config.password)
                     .build();
         } catch (Exception e) {
+            FargsClient.LOGGER.error("Failed to startup Comms Manager", e);
             throw new RuntimeException("Failed to startup Comms Manager", e);
         }
         new CommsDirectPub(connection);
@@ -36,9 +38,12 @@ public class CommsManager {
         clientId = FargsClient.config.clientId;
         instance = this;
 
-        sendMessage(new Message(clientId.toString(), MessageType.INIT, "Test"));
+        CommsDirectSub.instance.subscribe(clientId);
+        CommsFanoutSub.instance.subscribe();
 
-        sendMessage(new Message(clientId.toString(), MessageType.REGION_REQUEST, new String[] {"test", "test2"}));
+        sendMessage(new Message(clientId, MessageType.INIT, "Test"));
+
+        sendMessage(new Message(clientId, MessageType.REGION_REQUEST, new String[] {"test", "test2"}));
     }
 
     void sendMessage(Message message) {
@@ -46,16 +51,17 @@ public class CommsManager {
             ObjectMapper object = new ObjectMapper(new Gson());
             CommsDirectPub.instance.publish("server", object.writeValueAsString(message));
         } catch (Exception e) {
+            FargsClient.LOGGER.error("Failed to send message", e);
             throw new RuntimeException("Failed to send message", e);
         }
     }
 
     private void fanoutMessageHandler(String consumerTag, Delivery delivery) {
-        FargsClient.LOGGER.info("Received fanout message: {}", new String(delivery.getBody(), StandardCharsets.UTF_8));
+        FargsClient.LOGGER.info("Received fanout message: " + new String(delivery.getBody(), StandardCharsets.UTF_8));
     }
 
     private void directMessageHandler(String consumerTag, Delivery delivery) {
-        FargsClient.LOGGER.info("Received direct message: {}", new String(delivery.getBody(), StandardCharsets.UTF_8));
+        FargsClient.LOGGER.info("Received direct message: " + new String(delivery.getBody(), StandardCharsets.UTF_8));
     }
 
 }

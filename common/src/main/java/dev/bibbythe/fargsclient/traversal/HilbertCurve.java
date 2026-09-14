@@ -42,7 +42,7 @@ public class HilbertCurve {
      * @param currentPoint the 1-based index of the current point to resume traversal from
      * @throws IllegalArgumentException if {@code regionWidth} is not a power of 2 or exceeds the scan region width
      */
-    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk, int currentPoint) {
+    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk, int currentPoint) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
         this.scanWidth = 1 << (Integer.numberOfLeadingZeros(scanRadius * 2));
@@ -65,7 +65,7 @@ public class HilbertCurve {
      * @param startChunk  the starting chunk coordinate
      * @throws IllegalArgumentException if {@code regionWidth} is not a power of 2 or exceeds the scan region width
      */
-    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk) {
+    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
         int scanWidth = 1 << (Integer.numberOfLeadingZeros(scanRadius * 2));

@@ -4,6 +4,7 @@ import dev.bibbythe.fargsclient.events.AutopilotEvents;
 import dev.bibbythe.fargsclient.types.Waypoint;
 import dev.bibbythe.fargsclient.types.Point;
 
+import io.sentry.Sentry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.ChunkPos;
 
@@ -60,7 +61,7 @@ public class Autopilot {
      * @param startPos    the starting chunk coordinates
      * @throws IllegalStateException if the Minecraft player instance is null
      */
-    public static void startHilbert(int searchWidth, ChunkPos startPos) {
+    public static void startHilbert(int searchWidth, ChunkPos startPos) throws IllegalStateException {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             throw new IllegalStateException("Player is null");

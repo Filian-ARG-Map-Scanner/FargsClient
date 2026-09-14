@@ -24,11 +24,33 @@ configurations {
     }
 }
 
+sentry {
+    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+    // This enables source context, allowing you to see your source
+    // code as part of your stack traces in Sentry.
+    //
+    // Default is disabled.
+    includeSourceContext = true
+
+    // Includes additional source directories into the source bundle.
+    // These directories are resolved relative to the project directory.
+    additionalSourceDirsForSourceContext = ["../common/src/main/java"]
+
+    org = "filian-arg"
+    projectName = "fargs-client-neoforge"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
 repositories {
     maven {
         name = 'NeoForged'
         url = 'https://maven.neoforged.net/releases'
     }
+}
+
+
+sourcesJar.configure {
+    mustRunAfter(generateSentryDebugMetaPropertiesjava, collectExternalDependenciesForSentry)
 }
 
 dependencies {
@@ -39,6 +61,8 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
+    include "com.rabbitmq:amqp-client:5.33.0"
+    include "org.yaml:snakeyaml:2.7"
 }
 
 processResources {

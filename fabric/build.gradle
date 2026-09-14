@@ -23,7 +23,6 @@ configurations {
         canBeConsumed = false
     }
 }
-
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
@@ -35,6 +34,31 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+
+    include "com.rabbitmq:amqp-client:5.33.0"
+    include "org.yaml:snakeyaml:2.7"
+}
+
+
+sourcesJar.configure {
+    mustRunAfter(generateSentryDebugMetaPropertiesjava, collectExternalDependenciesForSentry)
+}
+
+sentry {
+    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+    // This enables source context, allowing you to see your source
+    // code as part of your stack traces in Sentry.
+    //
+    // Default is disabled.
+    includeSourceContext = true
+
+    // Includes additional source directories into the source bundle.
+    // These directories are resolved relative to the project directory.
+    additionalSourceDirsForSourceContext = ["../common/src/main/java"]
+
+    org = "filian-arg"
+    projectName = "fargs-client-fabric"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 processResources {
