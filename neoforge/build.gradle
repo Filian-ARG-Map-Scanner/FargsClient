@@ -49,9 +49,9 @@ dependencies {
 tasks.named('processResources') {
     inputs.property 'uuid', neoforge_bundle_uuid
     doLast {
-        File file = layout.projectDirectory.file('build/resources/main/sentry-dif-id').asFile
+        File file = layout.projectDirectory.file('build/resources/main/sentry-neoforge-dif-id').asFile
         if (file.exists()) {
-            file.delete();
+            file.delete()
         }
         file.createNewFile()
         file.write(inputs.properties.uuid as String)

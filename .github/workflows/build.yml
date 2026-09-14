@@ -38,6 +38,10 @@ jobs:
         uses: filipstefansson/uuid-action@v1.1
         id: neoforge_bundle_uuid
 
+      - name: UUID Action
+        uses: filipstefansson/uuid-action@v1.1
+        id: common_bundle_uuid
+
       - name: Setup Sentry CLI
         uses: matbour/setup-sentry-cli@v3.0.0
         id: sentry_setup
@@ -47,8 +51,9 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
         run: |
-          sentry-cli debug-files bundle-jvm --output fabric/build/generated/sentry --debug-id ${{ steps.fabric_bundle_uuid.outputs.uuid }} common/src/main/java fabric/src/main/java
-          sentry-cli debug-files bundle-jvm --output neoforge/build/generated/sentry --debug-id ${{ steps.neoforge_bundle_uuid.outputs.uuid }} common/src/main/java neoforge/src/main/java
+          sentry-cli debug-files bundle-jvm --output fabric/build/generated/sentry --debug-id ${{ steps.fabric_bundle_uuid.outputs.uuid }} fabric/src/main/java
+          sentry-cli debug-files bundle-jvm --output neoforge/build/generated/sentry --debug-id ${{ steps.neoforge_bundle_uuid.outputs.uuid }} neoforge/src/main/java
+          sentry-cli debug-files bundle-jvm --output common/build/generated/sentry --debug-id ${{ steps.fabric_bundle_uuid.outputs.uuid }} common/src/main/java
           sentry-cli debug-files upload --type jvm neoforge/build/generated/sentry fabric/build/generated/sentry
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
