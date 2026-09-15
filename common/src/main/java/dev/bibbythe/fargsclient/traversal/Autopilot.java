@@ -4,7 +4,6 @@ import dev.bibbythe.fargsclient.events.AutopilotEvents;
 import dev.bibbythe.fargsclient.types.Waypoint;
 import dev.bibbythe.fargsclient.types.Point;
 
-import io.sentry.Sentry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.ChunkPos;
 
@@ -90,9 +89,11 @@ public class Autopilot {
     /**
      * Pauses the currently running Hilbert curve traversal and fires the {@link AutopilotEvents.EnabledEvent#onEnabled()} (int, ChunkPos, int)} event.
      */
-    public static void pauseHilbert() {
+    public static void stopHilbert() {
         runningHilbert = false;
-        AutopilotEvents.HILBERT_PAUSED.invoker().onHilbertPaused(hilbertCurve.regionWidth, hilbertCurve.startChunk, hilbertCurve.CurrentPoint);
+        movingToTarget = false;
+        AutopilotEvents.HILBERT_STOPPED.invoker().onHilbertStopped(hilbertCurve.regionWidth, hilbertCurve.startChunk, hilbertCurve.CurrentPoint);
+        hilbertCurve = null;
     }
 
     /**

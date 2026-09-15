@@ -2,18 +2,6 @@ architectury {
     common rootProject.enabled_platforms.split(',')
 }
 
-tasks.named('processResources') {
-    inputs.property 'uuid', common_bundle_uuid
-    doLast {
-        File file = layout.projectDirectory.file('build/resources/main/sentry-common-dif-id').asFile
-        if (file.exists()) {
-            file.delete()
-        }
-        file.createNewFile()
-        file.write(inputs.properties.uuid as String)
-    }
-}
-
 dependencies {
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.

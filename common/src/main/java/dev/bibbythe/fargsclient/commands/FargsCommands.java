@@ -58,7 +58,7 @@ public class FargsCommands {
 
     static int stopHilbertCommand(CommandContext<ClientCommandSourceStack> context) {
         try {
-            Autopilot.pauseHilbert();
+            Autopilot.stopHilbert();
         } catch (Exception e) {
             SentryId sentryId = Sentry.captureException(e);
             context.getSource().arch$sendFailure(literal("Hilbert failed to stop. ErrorID: " + sentryId));

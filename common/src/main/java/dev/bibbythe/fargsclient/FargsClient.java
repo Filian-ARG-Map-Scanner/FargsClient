@@ -2,8 +2,10 @@ package dev.bibbythe.fargsclient;
 
 
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
 import dev.bibbythe.fargsclient.commands.FargsCommands;
 import dev.bibbythe.fargsclient.communication.CommsManager;
+import dev.bibbythe.fargsclient.traversal.Autopilot;
 import dev.bibbythe.fargsclient.types.ClientType;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
@@ -26,6 +28,19 @@ public final class FargsClient {
     private static String commonDifId = null;
 
     public static void setupSentry(ClientType client, String version) {
+        try (InputStream in = FargsClient.class.getResourceAsStream("/sentry-common-dif-id")) {
+            if (in == null) {
+                commonDifId = null;
+            } else {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                    commonDifId = reader.readLine();
+                }
+            }
+        } catch (IOException ignored) {
+        }
+        if (commonDifId.equals("1")) {
+            return;
+        }
         try (InputStream in = FargsClient.class.getResourceAsStream("/sentry-" + client.getValue() + "-dif-id")) {
             if (in == null) {
                 clientDifId = null;
@@ -35,16 +50,6 @@ public final class FargsClient {
                 }
             }
 
-        } catch (IOException ignored) {
-        }
-        try (InputStream in = FargsClient.class.getResourceAsStream("/sentry-common-dif-id")) {
-            if (in == null) {
-                commonDifId = null;
-            } else {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-                    commonDifId = reader.readLine();
-                }
-            }
         } catch (IOException ignored) {
         }
         Sentry.init(options -> {
@@ -77,6 +82,7 @@ public final class FargsClient {
         commsManager = new CommsManager();
         enabled = true;
         ClientCommandRegistrationEvent.EVENT.register(FargsCommands::registerCommands);
+        ClientTickEvent.CLIENT_POST.register(Autopilot::autoPilotRun);
     }
 
     public static void disable() {
@@ -84,6 +90,7 @@ public final class FargsClient {
             commsManager.disable();
         }
         ClientCommandRegistrationEvent.EVENT.unregister(FargsCommands::registerCommands);
+        ClientTickEvent.CLIENT_POST.unregister(Autopilot::autoPilotRun);
         enabled = false;
     }
 }

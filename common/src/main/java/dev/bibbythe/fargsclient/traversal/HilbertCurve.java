@@ -23,7 +23,7 @@ public class HilbertCurve {
     /**
      * The effective scan region width computed from the scan radius.
      */
-    int scanWidth;
+    private final int scanWidth;
     /**
      * The index of the current point along the Hilbert curve (-1 before traversal starts).
      */
@@ -31,7 +31,7 @@ public class HilbertCurve {
     /**
      * The total number of points in the Hilbert curve grid.
      */
-    public int MaxPoints;
+    private final int MaxPoints;
 
     /**
      * Constructs a Hilbert curve traversal with a specified initial point index.
@@ -45,7 +45,7 @@ public class HilbertCurve {
     public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk, int currentPoint) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
-        this.scanWidth = 1 << (Integer.numberOfLeadingZeros(scanRadius * 2));
+        this.scanWidth = highestPowerof2(scanRadius * 2);
         if (!((regionWidth > 0) && ((regionWidth & (regionWidth - 1)) == 0))) {
             throw new IllegalArgumentException("region size must be a power of 2");
         }
@@ -53,8 +53,19 @@ public class HilbertCurve {
             throw new IllegalArgumentException("region size must be larger must be greater than search area size");
         }
         MaxPoints = (regionWidth /scanWidth) * (regionWidth /scanWidth);
-        order = Integer.numberOfLeadingZeros(regionWidth /scanWidth);
+        order = 31 - Integer.numberOfLeadingZeros(regionWidth /scanWidth);
         this.CurrentPoint = currentPoint - 1;
+    }
+
+    int highestPowerof2(int N)
+    {
+
+        // if N is a power of two simply return it
+        if ((N & (N - 1)) == 0)
+            return N;
+
+        // else set only the most significant bit
+        return (1 << (Integer.toBinaryString(N).length() - 1));
     }
 
     /**
@@ -68,15 +79,15 @@ public class HilbertCurve {
     public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
-        int scanWidth = 1 << (Integer.numberOfLeadingZeros(scanRadius * 2));
+        this.scanWidth = highestPowerof2(scanRadius * 2);
         if (!((regionWidth > 0) && ((regionWidth & (regionWidth - 1)) == 0))) {
             throw new IllegalArgumentException("region size must be a power of 2");
         }
         if (regionWidth < scanWidth) {
-            throw new IllegalArgumentException("region size must be larger must be greater than search area size");
+            throw new IllegalArgumentException("region size must be greater than search area size");
         }
-        MaxPoints = (regionWidth /scanWidth) * (regionWidth /scanWidth);
-        order = Integer.numberOfLeadingZeros(regionWidth /scanWidth);
+        MaxPoints = (regionWidth / scanWidth) * (regionWidth / scanWidth);
+        order = 31 - Integer.numberOfLeadingZeros(regionWidth / scanWidth );
     }
 
     /**

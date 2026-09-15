@@ -18,7 +18,7 @@ public interface AutopilotEvents {
     Event<TargetChangedEvent> TARGET_CHANGED = EventFactory.createLoop();
     Event<TargetReachedEvent> TARGET_REACHED = EventFactory.createLoop();
     Event<HilbertStartedEvent> HILBERT_STARTED = EventFactory.createLoop();
-    Event<HilbertPausedEvent> HILBERT_PAUSED = EventFactory.createLoop();
+    Event<HilbertPausedEvent> HILBERT_STOPPED = EventFactory.createLoop();
     Event<HilbertFinishedEvent> HILBERT_FINISHED = EventFactory.createLoop();
     Event<MaxSpeedChangedEvent> MAX_SPEED_CHANGED = EventFactory.createLoop();
 
@@ -72,7 +72,7 @@ public interface AutopilotEvents {
          * @param startLocation the starting chunk coordinate
          * @param index         the index of the current point on the curve
          */
-        void onHilbertPaused(int searchWidth, ChunkPos startLocation, int index);
+        void onHilbertStopped(int searchWidth, ChunkPos startLocation, int index);
     }
 
     interface HilbertFinishedEvent {
