@@ -1,6 +1,8 @@
 package dev.bibbythe.fargsclient;
 
 
+import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import dev.bibbythe.fargsclient.commands.FargsCommands;
 import dev.bibbythe.fargsclient.communication.CommsManager;
 import dev.bibbythe.fargsclient.types.ClientType;
 import io.sentry.Sentry;
@@ -46,7 +48,6 @@ public final class FargsClient {
         } catch (IOException ignored) {
         }
         Sentry.init(options -> {
-            options.setDebug(true);
             if (!Objects.equals(clientDifId, null) && !Objects.equals(clientDifId, "00000000-0000-0000-0000-000000000000")) {
                 options.addBundleId(clientDifId);
             }
@@ -75,12 +76,14 @@ public final class FargsClient {
         Sentry.setUser(user);
         commsManager = new CommsManager();
         enabled = true;
+        ClientCommandRegistrationEvent.EVENT.register(FargsCommands::registerCommands);
     }
 
     public static void disable() {
         if (commsManager != null) {
             commsManager.disable();
         }
+        ClientCommandRegistrationEvent.EVENT.unregister(FargsCommands::registerCommands);
         enabled = false;
     }
 }
