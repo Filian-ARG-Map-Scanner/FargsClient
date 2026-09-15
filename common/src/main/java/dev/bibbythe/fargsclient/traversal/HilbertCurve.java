@@ -23,7 +23,7 @@ public class HilbertCurve {
     /**
      * The effective scan region width computed from the scan radius.
      */
-    private final int scanWidth;
+    public final int scanWidth;
     /**
      * The index of the current point along the Hilbert curve (-1 before traversal starts).
      */

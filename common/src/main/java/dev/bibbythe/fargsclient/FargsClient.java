@@ -5,10 +5,12 @@ import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.bibbythe.fargsclient.commands.FargsCommands;
 import dev.bibbythe.fargsclient.communication.CommsManager;
+import dev.bibbythe.fargsclient.scanning.ScanManager;
 import dev.bibbythe.fargsclient.traversal.Autopilot;
 import dev.bibbythe.fargsclient.types.ClientType;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
+import net.minecraft.client.MinecraftClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +18,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.Objects;
+
+import static dev.bibbythe.fargsclient.scanning.ScanManager.scanEnabled;
+import static dev.bibbythe.fargsclient.traversal.Autopilot.autoPilotMasterArm;
 
 public final class FargsClient {
     public static final String MOD_ID = "fargs_client";
@@ -82,7 +87,16 @@ public final class FargsClient {
         commsManager = new CommsManager();
         enabled = true;
         ClientCommandRegistrationEvent.EVENT.register(FargsCommands::registerCommands);
-        ClientTickEvent.CLIENT_POST.register(Autopilot::autoPilotRun);
+        ClientTickEvent.CLIENT_POST.register(FargsClient::tickLoop);
+    }
+
+    public static void tickLoop(MinecraftClient client) {
+        if (autoPilotMasterArm) {
+            Autopilot.autoPilotRun(client);
+        }
+        if (!scanEnabled) {
+            ScanManager.scanManagerRun(client);
+        }
     }
 
     public static void disable() {
@@ -90,7 +104,7 @@ public final class FargsClient {
             commsManager.disable();
         }
         ClientCommandRegistrationEvent.EVENT.unregister(FargsCommands::registerCommands);
-        ClientTickEvent.CLIENT_POST.unregister(Autopilot::autoPilotRun);
+        ClientTickEvent.CLIENT_POST.unregister(FargsClient::tickLoop);
         enabled = false;
     }
 }

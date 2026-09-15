@@ -23,7 +23,7 @@ public class Autopilot {
     /**
      * Master arm flag enabling or disabling autopilot execution.
      */
-    private static boolean autoPilotMasterArm = false;
+    public static boolean autoPilotMasterArm = false;
     /**
      * Flag indicating whether a Hilbert curve traversal pattern is currently running.
      */
@@ -31,11 +31,11 @@ public class Autopilot {
     /**
      * Flag indicating whether the player is currently in transit to a target point.
      */
-    private static boolean movingToTarget = false;
+    public static boolean movingToTarget = false;
     /**
      * The active Hilbert curve path generator instance.
      */
-    private static HilbertCurve hilbertCurve;
+    public static HilbertCurve hilbertCurve;
 
     /**
      * Enables the autopilot master switch and triggers the {@link AutopilotEvents.EnabledEvent#onEnabled()} event.
@@ -112,9 +112,6 @@ public class Autopilot {
      * @param client the Minecraft client instance
      */
     public static void autoPilotRun(MinecraftClient client) {
-        if (!autoPilotMasterArm) {
-            return;
-        }
         if (runningHilbert && !movingToTarget) {
             Waypoint waypoint = hilbertCurve.getNextWaypoint();
             if (waypoint != null) {
