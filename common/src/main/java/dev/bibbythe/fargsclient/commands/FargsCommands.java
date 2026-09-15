@@ -5,8 +5,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent.ClientCommandSourceStack;
 import dev.bibbythe.fargsclient.traversal.Autopilot;
+import io.sentry.Sentry;
+import io.sentry.protocol.SentryId;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
+
+import static net.minecraft.text.Text.literal;
 
 public class FargsCommands {
 
@@ -18,26 +21,50 @@ public class FargsCommands {
     }
 
     static int enableAutopilot(CommandContext<ClientCommandSourceStack> context) {
-        Autopilot.enable();
-        context.getSource().arch$sendSuccess(() -> Text.literal("Autopilot enabled"), false);
+        try {
+            Autopilot.enable();
+        } catch (Exception e) {
+            SentryId sentryId = Sentry.captureException(e);
+            context.getSource().arch$sendFailure(literal("Autopilot failed to enable. ErrorID: " + sentryId));
+            return 0;
+        }
+        context.getSource().arch$sendSuccess(() -> literal("Autopilot enabled"), false);
         return 1;
     }
 
     static int disableAutopilot(CommandContext<ClientCommandSourceStack> context) {
-        Autopilot.disable();
-        context.getSource().arch$sendSuccess(() -> Text.literal("Autopilot disabled"), false);
+        try {
+            Autopilot.disable();
+        } catch (Exception e) {
+            SentryId sentryId = Sentry.captureException(e);
+            context.getSource().arch$sendFailure(literal("Autopilot failed to disable. ErrorID: " + sentryId));
+            return 0;
+        }
+        context.getSource().arch$sendSuccess(() -> literal("Autopilot disabled"), false);
         return 1;
     }
 
     static int startHilbertCommand(CommandContext<ClientCommandSourceStack> context) {
-        Autopilot.startHilbert(524288);
-        context.getSource().arch$sendSuccess(() -> Text.literal("Hilbert curve started"), false);
+        try {
+            Autopilot.startHilbert(524288);
+        } catch (Exception e) {
+            SentryId sentryId = Sentry.captureException(e);
+            context.getSource().arch$sendFailure(literal("Hilbert failed to start. ErrorID: " + sentryId));
+            return 0;
+        }
+        context.getSource().arch$sendSuccess(() -> literal("Hilbert curve started"), false);
         return 1;
     }
 
     static int stopHilbertCommand(CommandContext<ClientCommandSourceStack> context) {
-        Autopilot.pauseHilbert();
-        context.getSource().arch$sendSuccess(() -> Text.literal("Hilbert curve stopped"), false);
+        try {
+            Autopilot.pauseHilbert();
+        } catch (Exception e) {
+            SentryId sentryId = Sentry.captureException(e);
+            context.getSource().arch$sendFailure(literal("Hilbert failed to stop. ErrorID: " + sentryId));
+            return 0;
+        }
+        context.getSource().arch$sendSuccess(() -> literal("Hilbert curve stopped"), false);
         return 1;
     }
 }
