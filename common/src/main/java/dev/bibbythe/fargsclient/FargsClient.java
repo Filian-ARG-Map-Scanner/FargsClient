@@ -15,12 +15,14 @@ import java.util.Objects;
 
 public final class FargsClient {
     public static final String MOD_ID = "fargs_client";
+    public static boolean enabled = true;
     public static Logger LOGGER = new Logger();
     public static Config config;
     public static CommsManager commsManager;
 
     private static String clientDifId = null;
     private static String commonDifId = null;
+
     public static void setupSentry(ClientType client, String version) {
         try (InputStream in = FargsClient.class.getResourceAsStream("/sentry-" + client.getValue() + "-dif-id")) {
             if (in == null) {
@@ -61,6 +63,7 @@ public final class FargsClient {
             }
         });
     }
+
     public static void init(Path configDir) {
         config = Config.loadConfig(configDir.resolve("fargs"));
         if (config == null) {
@@ -71,5 +74,13 @@ public final class FargsClient {
         user.setId(config.clientId);
         Sentry.setUser(user);
         commsManager = new CommsManager();
+        enabled = true;
+    }
+
+    public static void disable() {
+        if (commsManager != null) {
+            commsManager.disable();
+        }
+        enabled = false;
     }
 }

@@ -18,7 +18,11 @@ public final class FargsClientFabric implements ClientModInitializer {
     }
     @Override
     public void onInitializeClient() {
-        FargsClient.init(FabricLoader.getInstance().getConfigDir());
+        try {
+            FargsClient.init(FabricLoader.getInstance().getConfigDir());
+        } catch (Exception e) {
+            FargsClient.disable();
+        }
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.
     }
 }

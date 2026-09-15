@@ -46,6 +46,13 @@ public class CommsManager {
         sendMessage(new Message(clientId, MessageType.REGION_REQUEST, new String[] {"test", "test2"}));
     }
 
+    public void disable() {
+        if (connection != null) {
+            connection.close();
+        }
+        instance = null;
+    }
+
     void sendMessage(Message message) {
         try {
             ObjectMapper object = new ObjectMapper(new Gson());

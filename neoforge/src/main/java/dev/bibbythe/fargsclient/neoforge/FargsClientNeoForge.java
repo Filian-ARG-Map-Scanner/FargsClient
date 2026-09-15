@@ -13,6 +13,10 @@ public final class FargsClientNeoForge {
     public FargsClientNeoForge(ModContainer container) {
         FargsClient.setupSentry(ClientType.NEOFORGE, container.getModInfo().getVersion().toString());
         // Run our common setup.
-        FargsClient.init(FMLPaths.CONFIGDIR.get());
+        try {
+            FargsClient.init(FMLPaths.CONFIGDIR.get());
+        } catch (Exception e) {
+            FargsClient.disable();
+        }
     }
 }
