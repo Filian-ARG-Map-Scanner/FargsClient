@@ -42,14 +42,21 @@ dependencies {
 }
 
 tasks.named('processResources') {
-    inputs.property 'uuid', fabric_bundle_uuid
+    inputs.property 'fabric_uuid', fabric_bundle_uuid
+    inputs.property 'common_uuid', common_bundle_uuid
     doLast {
-        File file = layout.projectDirectory.file('build/resources/main/sentry-fabric-dif-id').asFile
-        if (file.exists()) {
-            file.delete()
+        File fabric = layout.projectDirectory.file('build/resources/main/sentry-fabric-dif-id').asFile
+        if (fabric.exists()) {
+            fabric.delete()
         }
-        file.createNewFile()
-        file.write(inputs.properties.uuid as String)
+        fabric.createNewFile()
+        fabric.write(inputs.properties.fabric_uuid as String)
+        File common = layout.projectDirectory.file('build/resources/main/sentry-common-dif-id').asFile
+        if (common.exists()) {
+            common.delete()
+        }
+        common.createNewFile()
+        common.write(inputs.properties.common_uuid as String)
     }
 }
 

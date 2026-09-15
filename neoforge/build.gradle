@@ -47,14 +47,21 @@ dependencies {
 }
 
 tasks.named('processResources') {
-    inputs.property 'uuid', neoforge_bundle_uuid
+    inputs.property 'neoforge_uuid', neoforge_bundle_uuid
+    inputs.property 'common_uuid', common_bundle_uuid
     doLast {
-        File file = layout.projectDirectory.file('build/resources/main/sentry-neoforge-dif-id').asFile
-        if (file.exists()) {
-            file.delete()
+        File neoforge = layout.projectDirectory.file('build/resources/main/sentry-neoforge-dif-id').asFile
+        if (neoforge.exists()) {
+            neoforge.delete()
         }
-        file.createNewFile()
-        file.write(inputs.properties.uuid as String)
+        neoforge.createNewFile()
+        neoforge.write(inputs.properties.neoforge_uuid as String)
+        File common = layout.projectDirectory.file('build/resources/main/sentry-common-dif-id').asFile
+        if (common.exists()) {
+            common.delete()
+        }
+        common.createNewFile()
+        common.write(inputs.properties.common_uuid as String)
     }
 }
 
