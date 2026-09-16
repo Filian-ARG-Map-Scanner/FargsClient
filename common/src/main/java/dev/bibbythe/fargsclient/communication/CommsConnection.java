@@ -3,8 +3,6 @@ package dev.bibbythe.fargsclient.communication;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import dev.bibbythe.fargsclient.FargsClient;
-import dev.bibbythe.fargsclient.communication.types.Message;
-import dev.bibbythe.fargsclient.communication.types.MessageType;
 
 import java.io.IOException;
 import java.util.ArrayList;

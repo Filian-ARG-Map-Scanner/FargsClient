@@ -15,7 +15,7 @@ public class HilbertCurve {
     /**
      * The starting chunk coordinate for the traversal region.
      */
-    final ChunkPos startChunk;
+    public final ChunkPos startChunk;
     /**
      * The region width (in chunks) representing the width of the scan area.
      */
@@ -23,7 +23,7 @@ public class HilbertCurve {
     /**
      * The effective scan region width computed from the scan radius.
      */
-    public final int scanWidth;
+    public final int scanWidth = 16;
     /**
      * The index of the current point along the Hilbert curve (-1 before traversal starts).
      */
@@ -37,54 +37,33 @@ public class HilbertCurve {
      * Constructs a Hilbert curve traversal with a specified initial point index.
      *
      * @param regionWidth  the width of the region to scan in chunks (must be a power of 2)
-     * @param scanRadius   the scan radius in chunks used to determine the total scan width
      * @param startChunk   the starting chunk coordinate
      * @param currentPoint the 1-based index of the current point to resume traversal from
      * @throws IllegalArgumentException if {@code regionWidth} is not a power of 2 or exceeds the scan region width
      */
-    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk, int currentPoint) throws IllegalArgumentException {
+    public HilbertCurve(int regionWidth, ChunkPos startChunk, int currentPoint) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
-        this.scanWidth = highestPowerof2(scanRadius * 2);
         if (!((regionWidth > 0) && ((regionWidth & (regionWidth - 1)) == 0))) {
             throw new IllegalArgumentException("region size must be a power of 2");
-        }
-        if (regionWidth < scanWidth) {
-            throw new IllegalArgumentException("region size must be larger must be greater than search area size");
         }
         MaxPoints = (regionWidth /scanWidth) * (regionWidth /scanWidth);
         order = 31 - Integer.numberOfLeadingZeros(regionWidth /scanWidth);
         this.CurrentPoint = currentPoint - 1;
     }
 
-    int highestPowerof2(int N)
-    {
-
-        // if N is a power of two simply return it
-        if ((N & (N - 1)) == 0)
-            return N;
-
-        // else set only the most significant bit
-        return (1 << (Integer.toBinaryString(N).length() - 1));
-    }
-
     /**
      * Constructs a Hilbert curve traversal starting from the beginning.
      *
      * @param regionWidth  the width of the region to scan in chunks (must be a power of 2)
-     * @param scanRadius  the scan radius in chunks used to determine the total scan width
      * @param startChunk  the starting chunk coordinate
      * @throws IllegalArgumentException if {@code regionWidth} is not a power of 2 or exceeds the scan region width
      */
-    public HilbertCurve(int regionWidth, int scanRadius, ChunkPos startChunk) throws IllegalArgumentException {
+    public HilbertCurve(int regionWidth, ChunkPos startChunk) throws IllegalArgumentException {
         this.startChunk = startChunk;
         this.regionWidth = regionWidth;
-        this.scanWidth = highestPowerof2(scanRadius * 2);
         if (!((regionWidth > 0) && ((regionWidth & (regionWidth - 1)) == 0))) {
             throw new IllegalArgumentException("region size must be a power of 2");
-        }
-        if (regionWidth < scanWidth) {
-            throw new IllegalArgumentException("region size must be greater than search area size");
         }
         MaxPoints = (regionWidth / scanWidth) * (regionWidth / scanWidth);
         order = 31 - Integer.numberOfLeadingZeros(regionWidth / scanWidth );

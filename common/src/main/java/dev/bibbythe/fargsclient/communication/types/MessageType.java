@@ -4,9 +4,10 @@ import java.io.Serializable;
 
 public enum MessageType implements Serializable {
     INIT,
+    DISCONNECT,
+    BLACKLIST,
     REGION_REQUEST,
-    REGION,
-    SERVER_RESTART,
-    REJOIN,
+    REGION_REQUEST_RESPONSE,
     SCAN_RESULT,
+    UPDATE_AVAILABLE
 }

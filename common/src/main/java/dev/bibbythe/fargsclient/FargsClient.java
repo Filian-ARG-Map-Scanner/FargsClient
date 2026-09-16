@@ -2,15 +2,20 @@ package dev.bibbythe.fargsclient;
 
 
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.bibbythe.fargsclient.commands.FargsCommands;
 import dev.bibbythe.fargsclient.communication.CommsManager;
+import dev.bibbythe.fargsclient.communication.types.datatypes.RegionRequestResponseData;
+import dev.bibbythe.fargsclient.events.CommunicationEvents;
 import dev.bibbythe.fargsclient.scanning.ScanManager;
 import dev.bibbythe.fargsclient.traversal.Autopilot;
 import dev.bibbythe.fargsclient.types.ClientType;
 import io.sentry.Sentry;
 import io.sentry.protocol.User;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.ChunkPos;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,11 +33,14 @@ public final class FargsClient {
     public static Logger LOGGER = new Logger();
     public static Config config;
     public static CommsManager commsManager;
+    public static String Version;
 
     private static String clientDifId = null;
     private static String commonDifId = null;
 
+
     public static void setupSentry(ClientType client, String version) {
+        Version = version;
         try (InputStream in = FargsClient.class.getResourceAsStream("/sentry-common-dif-id")) {
             if (in == null) {
                 commonDifId = null;
@@ -87,14 +95,38 @@ public final class FargsClient {
         commsManager = new CommsManager();
         enabled = true;
         ClientCommandRegistrationEvent.EVENT.register(FargsCommands::registerCommands);
+        ClientLifecycleEvent.CLIENT_STOPPING.register(FargsClient::onClientStopping);
         ClientTickEvent.CLIENT_POST.register(FargsClient::tickLoop);
+        CommunicationEvents.REGION_REQUEST_RESPONSE_RECEIVED.register(FargsClient::regionRequestResponseReceived);
     }
+
+    private static void onClientStopping(MinecraftClient minecraftClient) {
+        disable();
+    }
+
+    private static void regionRequestResponseReceived(RegionRequestResponseData regionRequestResponseData) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null){
+            FargsClient.LOGGER.error("Player is null", new NullPointerException("Player is null"));
+            return;
+        }
+        if (regionRequestResponseData.isResume) {
+            MinecraftClient.getInstance().player.sendMessage(Text.literal("Resuming previously started scan"), false);
+            Autopilot.startHilbert(regionRequestResponseData.width, new ChunkPos(regionRequestResponseData.x, regionRequestResponseData.z), regionRequestResponseData.index);
+        } else {
+            MinecraftClient.getInstance().player.sendMessage(Text.literal("Starting Scan"), false);
+            Autopilot.startHilbert(regionRequestResponseData.width, new ChunkPos(regionRequestResponseData.x, regionRequestResponseData.z));
+        }
+        Autopilot.enable();
+        scanEnabled = true;
+    }
+
 
     public static void tickLoop(MinecraftClient client) {
         if (autoPilotMasterArm) {
             Autopilot.autoPilotRun(client);
         }
-        if (!scanEnabled) {
+        if (scanEnabled) {
             ScanManager.scanManagerRun(client);
         }
     }
@@ -102,9 +134,17 @@ public final class FargsClient {
     public static void disable() {
         if (commsManager != null) {
             commsManager.disable();
+            commsManager = null;
+        }
+        try {
+            ScanManager.stopScan();
+        } catch (Exception e) {
+            LOGGER.error("Failed to stop scan", e);
         }
         ClientCommandRegistrationEvent.EVENT.unregister(FargsCommands::registerCommands);
         ClientTickEvent.CLIENT_POST.unregister(FargsClient::tickLoop);
+        ClientTickEvent.CLIENT_POST.unregister(FargsClient::tickLoop);
+        CommunicationEvents.REGION_REQUEST_RESPONSE_RECEIVED.unregister(FargsClient::regionRequestResponseReceived);
         enabled = false;
     }
 }

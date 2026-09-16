@@ -1,21 +1,24 @@
 package dev.bibbythe.fargsclient.communication;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.mojang.authlib.minecraft.client.ObjectMapper;
 import com.rabbitmq.client.Delivery;
 import dev.bibbythe.fargsclient.FargsClient;
 import dev.bibbythe.fargsclient.communication.types.Message;
 import dev.bibbythe.fargsclient.communication.types.MessageType;
 import dev.bibbythe.fargsclient.events.CommunicationEvents;
-import io.sentry.Sentry;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.util.*;
+
+import static dev.bibbythe.fargsclient.communication.MessageHandler.*;
 
 public class CommsManager {
     CommsConnection connection;
     CommsManager instance;
     String clientId;
+
+    Gson objectMapper = new Gson();
     public CommsManager() {
         try {
             connection = new CommsConnectionBuilder()
@@ -41,34 +44,66 @@ public class CommsManager {
         CommsDirectSub.instance.subscribe(clientId);
         CommsFanoutSub.instance.subscribe();
 
-        sendMessage(new Message(clientId, MessageType.INIT, "Test"));
-
-        sendMessage(new Message(clientId, MessageType.REGION_REQUEST, new String[] {"test", "test2"}));
+        sendMessage(new Message<>(MessageType.INIT, FargsClient.Version));
     }
 
     public void disable() {
+        sendMessage(new Message<>(MessageType.DISCONNECT));
         if (connection != null) {
             connection.close();
         }
         instance = null;
     }
 
-    void sendMessage(Message message) {
+    public <T> void sendMessage(Message<T> message) {
         try {
-            ObjectMapper object = new ObjectMapper(new Gson());
-            CommsDirectPub.instance.publish("server", object.writeValueAsString(message));
+            CommsDirectPub.instance.publish("server", objectMapper.toJson(message));
         } catch (Exception e) {
             FargsClient.LOGGER.error("Failed to send message", e);
             throw new RuntimeException("Failed to send message", e);
         }
     }
 
+    private <T> Message<T> deserializeData(String message) {
+        return objectMapper.fromJson(message, new TypeToken<Message<T>>() {}.getType());
+    }
+
     private void fanoutMessageHandler(String consumerTag, Delivery delivery) {
-        FargsClient.LOGGER.info("Received fanout message: " + new String(delivery.getBody(), StandardCharsets.UTF_8));
+        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+        Message<Object> msg = deserializeData(message);
+        if (!Objects.equals(msg.from, "server")) {
+            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.from));
+        }
+        switch (msg.type) {
+            case BLACKLIST:
+                handleBlacklistMessage(deserializeData(message));
+                break;
+            default:
+                FargsClient.LOGGER.error("Invalid message type for fanout: " + msg.type, new IllegalArgumentException("Invalid message type for fanout: " + msg.type));
+                break;
+        }
     }
 
     private void directMessageHandler(String consumerTag, Delivery delivery) {
-        FargsClient.LOGGER.info("Received direct message: " + new String(delivery.getBody(), StandardCharsets.UTF_8));
+        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+        Message<Object> msg = deserializeData(message);
+        if (!Objects.equals(msg.from, "server")) {
+            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.from));
+        }
+        switch (msg.type) {
+            case BLACKLIST:
+                handleBlacklistMessage(deserializeData(message));
+                break;
+            case REGION_REQUEST_RESPONSE:
+                handleRegionRequestResponseMessage(deserializeData(message));
+                break;
+            case UPDATE_AVAILABLE:
+                handleUpdateAvailable(deserializeData(message));
+                break;
+            default:
+                FargsClient.LOGGER.error("Invalid message type for direct: " + msg.type, new IllegalArgumentException("Invalid message type for direct: " + msg.type));
+                break;
+        }
     }
 
 }

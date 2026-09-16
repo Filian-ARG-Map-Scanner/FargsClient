@@ -1,6 +1,9 @@
 package dev.bibbythe.fargsclient.scanning;
 
 import dev.bibbythe.fargsclient.FargsClient;
+import dev.bibbythe.fargsclient.communication.types.Message;
+import dev.bibbythe.fargsclient.communication.types.MessageType;
+import dev.bibbythe.fargsclient.communication.types.datatypes.ScanResultData;
 import dev.bibbythe.fargsclient.traversal.Autopilot;
 import dev.bibbythe.fargsclient.types.FoundBlock;
 import net.minecraft.block.Block;
@@ -18,8 +21,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ScanManager {
-    public static CopyOnWriteArrayList<Block> ignoredBlocks = new CopyOnWriteArrayList<>();
-    public static ConcurrentHashMap<Block, String> blockIdCache = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ArrayList<Block>> ignoredBlocks = new ConcurrentHashMap<>(3);
     public static boolean scanEnabled = false;
     public static boolean scanRunning = false;
     private static int failedChunkAttempts = 0;
@@ -42,11 +44,7 @@ public class ScanManager {
 
         if (scanRunning) {
             if (!sectionScannerFutures.isEmpty() && sectionScannerFutures.stream().allMatch(Future::isDone)) {
-                List<FoundBlock> foundBlocks = sectionScannerFutures.stream().map(Future::resultNow).flatMap(List::stream).toList();
-                sectionScannerFutures.clear();
-                //TODO: send found blocks to server
-                FargsClient.LOGGER.info("Found blocks: " + foundBlocks.size());
-                scanRunning = false;
+                reportScanResult();
             } else {
                 if (firstPassDone && !failedChunks.isEmpty()) {
                     failedChunkAttempts++;
@@ -61,8 +59,17 @@ public class ScanManager {
             }
         } else {
             scanRunning = true;
+            firstPassDone = false;
             scanArea(client);
         }
+    }
+
+    private static void reportScanResult() {
+        FoundBlock[] foundBlocks = sectionScannerFutures.stream().map(Future::resultNow).flatMap(List::stream).toList().toArray(FoundBlock[]::new);
+        sectionScannerFutures.clear();
+        FargsClient.commsManager.sendMessage(new Message<>(MessageType.SCAN_RESULT, new ScanResultData(foundBlocks)));
+        FargsClient.LOGGER.info("Found blocks: " + foundBlocks.length);
+        scanRunning = false;
     }
 
     private static void processFailedChunks(MinecraftClient client) {
@@ -104,7 +111,11 @@ public class ScanManager {
                     if (chunkSection.isEmpty())
                         continue;
                     int sectionPos = chunk.sectionIndexToCoord(i);
-                    sectionScannerFutures.add(sectionScannerService.submit(new SectionScanner(chunkSection, chunk.getPos(), sectionPos)));
+                    sectionScannerFutures.add(
+                            sectionScannerService.submit(
+                                    new SectionScanner(chunkSection, chunk.getPos(), sectionPos, world.getRegistryKey().getValue().toString())
+                            )
+                    );
                 }
             }
         } catch (
@@ -114,5 +125,12 @@ public class ScanManager {
     }
 
 
-
+    public static void stopScan() throws InterruptedException {
+        scanEnabled = false;
+        scanRunning = false;
+        sectionScannerService.shutdown();
+        Autopilot.disable();
+        //noinspection ResultOfMethodCallIgnored
+        sectionScannerService.awaitTermination(1, TimeUnit.MINUTES);
+    }
 }

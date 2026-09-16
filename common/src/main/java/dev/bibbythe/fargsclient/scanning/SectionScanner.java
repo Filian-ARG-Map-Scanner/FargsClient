@@ -16,18 +16,21 @@ public class SectionScanner implements Callable<List<FoundBlock>> {
     private final ChunkSection chunkSection;
     private final ChunkPos chunkPos;
     private final int sectionPos;
+    private final String dimension;
 
-    public SectionScanner(ChunkSection chunkSection, ChunkPos chunkPos, int sectionPos) {
+    public SectionScanner(ChunkSection chunkSection, ChunkPos chunkPos, int sectionPos, String dimension) {
         this.chunkSection = chunkSection;
         this.chunkPos = chunkPos;
         this.sectionPos = sectionPos;
+        this.dimension = dimension;
     }
 
-    final Predicate<BlockState> blockStatePredicate = blockState ->  (!ScanManager.ignoredBlocks.contains(blockState.getBlock()));
+
 
 
     @Override
     public List<FoundBlock> call() {
+        Predicate<BlockState> blockStatePredicate = blockState ->  (!ScanManager.ignoredBlocks.get(dimension).contains(blockState.getBlock()));
         List<FoundBlock> foundBlocks = new ArrayList<>();
         if (chunkSection.hasAny(blockStatePredicate)) {
             for(int j = 0; j < 16; ++j) {
@@ -36,11 +39,7 @@ public class SectionScanner implements Callable<List<FoundBlock>> {
                         BlockState blockState = chunkSection.getBlockState(l, j, k);
                         if (blockStatePredicate.test(blockState)) {
                             BlockPos blockPos =  getBlockPosFromSection(chunkPos, sectionPos, l, j, k);
-                            String blockId = ScanManager.blockIdCache.computeIfAbsent(
-                                    blockState.getBlock(),
-                                    cachedBlock -> Registries.BLOCK.getId(cachedBlock).toString()
-                            );
-                            foundBlocks.add(new FoundBlock(blockId, blockPos));
+                            foundBlocks.add(new FoundBlock(Registries.BLOCK.getId(blockState.getBlock()).toString(), blockPos));
                         }
                     }
                 }

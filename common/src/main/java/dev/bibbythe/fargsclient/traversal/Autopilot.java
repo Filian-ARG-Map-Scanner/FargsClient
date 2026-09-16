@@ -1,11 +1,15 @@
 package dev.bibbythe.fargsclient.traversal;
 
+import dev.bibbythe.fargsclient.FargsClient;
 import dev.bibbythe.fargsclient.events.AutopilotEvents;
 import dev.bibbythe.fargsclient.types.Waypoint;
 import dev.bibbythe.fargsclient.types.Point;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
+
+import static dev.bibbythe.fargsclient.scanning.ScanManager.scanRunning;
 
 /**
  * Controller class managing autopilot traversal and player movement along paths and targets.
@@ -45,11 +49,17 @@ public class Autopilot {
         AutopilotEvents.ENABLED.invoker().onEnabled();
     }
 
+    public static void pause() {
+        autoPilotMasterArm = false;
+        AutopilotEvents.DISABLED.invoker().onDisabled();
+    }
+
     /**
      * Disables the autopilot master switch and triggers the {@link AutopilotEvents.DisabledEvent#onDisabled()} event.
      */
     public static void disable() {
         autoPilotMasterArm = false;
+        hilbertCurve = null;
         AutopilotEvents.DISABLED.invoker().onDisabled();
     }
 
@@ -65,7 +75,17 @@ public class Autopilot {
         if (client.player == null) {
             throw new IllegalStateException("Player is null");
         }
-        hilbertCurve = new HilbertCurve(searchWidth,client.options.getViewDistance().getValue(), startPos);
+        hilbertCurve = new HilbertCurve(searchWidth, startPos);
+        runningHilbert = true;
+        AutopilotEvents.HILBERT_STARTED.invoker().onHilbertStarted(searchWidth, startPos);
+    }
+
+    public static void startHilbert(int searchWidth, ChunkPos startPos, int index) throws IllegalStateException {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            throw new IllegalStateException("Player is null");
+        }
+        hilbertCurve = new HilbertCurve(searchWidth, startPos, index);
         runningHilbert = true;
         AutopilotEvents.HILBERT_STARTED.invoker().onHilbertStarted(searchWidth, startPos);
     }
@@ -81,10 +101,11 @@ public class Autopilot {
         if (client.player == null) {
             throw new IllegalStateException("Player is null");
         }
-        hilbertCurve = new HilbertCurve(searchWidth,client.options.getViewDistance().getValue(), client.player.getChunkPos());
+        hilbertCurve = new HilbertCurve(searchWidth, client.player.getChunkPos());
         runningHilbert = true;
         AutopilotEvents.HILBERT_STARTED.invoker().onHilbertStarted(searchWidth, client.player.getChunkPos());
     }
+
 
     /**
      * Pauses the currently running Hilbert curve traversal and fires the {@link AutopilotEvents.EnabledEvent#onEnabled()} (int, ChunkPos, int)} event.
@@ -112,7 +133,13 @@ public class Autopilot {
      * @param client the Minecraft client instance
      */
     public static void autoPilotRun(MinecraftClient client) {
+        if (client.player == null) {
+            FargsClient.LOGGER.error("Player is null", new NullPointerException("Player is null"));
+        }
         if (runningHilbert && !movingToTarget) {
+            if (scanRunning) {
+                return;
+            }
             Waypoint waypoint = hilbertCurve.getNextWaypoint();
             if (waypoint != null) {
                 targetLocation = waypoint.toPoint();
@@ -120,12 +147,16 @@ public class Autopilot {
                 return;
             }
             AutopilotEvents.HILBERT_FINISHED.invoker().onHilbertFinished();
+            autoPilotMasterArm = false;
             runningHilbert = false;
+            client.player.sendMessage(Text.literal("Scan job successfully finished"), false);
             return;
         }
         if (movingToTarget) {
             movingToTarget = moveToPoint(client);
         }
+        autoPilotMasterArm = false;
+        client.player.sendMessage(Text.literal("Target reached"), false);
     }
 
     /**
