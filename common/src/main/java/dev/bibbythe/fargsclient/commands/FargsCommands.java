@@ -21,7 +21,7 @@ import static net.minecraft.text.Text.literal;
 
 public class FargsCommands {
 
-    public static void registerCommands(CommandDispatcher<ClientCommandSourceStack> dispatcher, CommandRegistryAccess registry) {
+    public static void registerCommands(CommandDispatcher<ClientCommandSourceStack> dispatcher, CommandRegistryAccess   registry) {
         dispatcher.register(LiteralArgumentBuilder.<ClientCommandSourceStack>literal("startScan").executes(FargsCommands::startScanCommand));
         dispatcher.register(LiteralArgumentBuilder.<ClientCommandSourceStack>literal("pauseScan").executes(FargsCommands::pauseScanCommand));
         dispatcher.register(LiteralArgumentBuilder.<ClientCommandSourceStack>literal("resumeScan").executes(FargsCommands::resumeScanCommand));

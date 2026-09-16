@@ -1,6 +1,8 @@
 package dev.bibbythe.fargsclient.traversal;
 
 import dev.bibbythe.fargsclient.FargsClient;
+import dev.bibbythe.fargsclient.communication.types.Message;
+import dev.bibbythe.fargsclient.communication.types.MessageType;
 import dev.bibbythe.fargsclient.events.AutopilotEvents;
 import dev.bibbythe.fargsclient.types.Waypoint;
 import dev.bibbythe.fargsclient.types.Point;
@@ -147,6 +149,7 @@ public class Autopilot {
                 return;
             }
             AutopilotEvents.HILBERT_FINISHED.invoker().onHilbertFinished();
+            FargsClient.commsManager.sendMessage(new Message<>(MessageType.REGION_COMPLETE));
             autoPilotMasterArm = false;
             runningHilbert = false;
             client.player.sendMessage(Text.literal("Scan job successfully finished"), false);

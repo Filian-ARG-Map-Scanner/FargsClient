@@ -132,14 +132,14 @@ public final class FargsClient {
     }
 
     public static void disable() {
-        if (commsManager != null) {
-            commsManager.disable();
-            commsManager = null;
-        }
         try {
             ScanManager.stopScan();
         } catch (Exception e) {
             LOGGER.error("Failed to stop scan", e);
+        }
+        if (commsManager != null) {
+            commsManager.disable();
+            commsManager = null;
         }
         ClientCommandRegistrationEvent.EVENT.unregister(FargsCommands::registerCommands);
         ClientTickEvent.CLIENT_POST.unregister(FargsClient::tickLoop);

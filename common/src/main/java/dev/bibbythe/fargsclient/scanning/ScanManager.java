@@ -65,10 +65,10 @@ public class ScanManager {
     }
 
     private static void reportScanResult() {
-        FoundBlock[] foundBlocks = sectionScannerFutures.stream().map(Future::resultNow).flatMap(List::stream).toList().toArray(FoundBlock[]::new);
+        List<FoundBlock> foundBlocks = sectionScannerFutures.stream().map(Future::resultNow).flatMap(List::stream).toList();
         sectionScannerFutures.clear();
         FargsClient.commsManager.sendMessage(new Message<>(MessageType.SCAN_RESULT, new ScanResultData(foundBlocks)));
-        FargsClient.LOGGER.info("Found blocks: " + foundBlocks.length);
+        FargsClient.LOGGER.info("Found blocks: " + foundBlocks.size());
         scanRunning = false;
     }
 
@@ -132,5 +132,6 @@ public class ScanManager {
         Autopilot.disable();
         //noinspection ResultOfMethodCallIgnored
         sectionScannerService.awaitTermination(1, TimeUnit.MINUTES);
+        FargsClient.commsManager.sendMessage(new Message<>(MessageType.DISCONNECT));
     }
 }

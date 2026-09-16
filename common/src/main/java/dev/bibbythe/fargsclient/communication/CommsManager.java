@@ -6,6 +6,7 @@ import com.rabbitmq.client.Delivery;
 import dev.bibbythe.fargsclient.FargsClient;
 import dev.bibbythe.fargsclient.communication.types.Message;
 import dev.bibbythe.fargsclient.communication.types.MessageType;
+import dev.bibbythe.fargsclient.communication.types.Packet;
 import dev.bibbythe.fargsclient.events.CommunicationEvents;
 
 import java.nio.charset.StandardCharsets;
@@ -48,7 +49,6 @@ public class CommsManager {
     }
 
     public void disable() {
-        sendMessage(new Message<>(MessageType.DISCONNECT));
         if (connection != null) {
             connection.close();
         }
@@ -64,33 +64,41 @@ public class CommsManager {
         }
     }
 
-    private <T> Message<T> deserializeData(String message) {
-        return objectMapper.fromJson(message, new TypeToken<Message<T>>() {}.getType());
+    private <T> Packet<T> deserializeData(String message) {
+        return objectMapper.fromJson(message, new TypeToken<Packet<T>>() {}.getType());
     }
 
     private void fanoutMessageHandler(String consumerTag, Delivery delivery) {
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        Message<Object> msg = deserializeData(message);
-        if (!Objects.equals(msg.from, "server")) {
-            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.from));
+        Packet<?> msg = deserializeData(message);
+        if (!Objects.equals(msg.data.from, "server")) {
+            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.data.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.data.from));
         }
-        switch (msg.type) {
+        switch (msg.data.type) {
             case BLACKLIST:
                 handleBlacklistMessage(deserializeData(message));
                 break;
             default:
-                FargsClient.LOGGER.error("Invalid message type for fanout: " + msg.type, new IllegalArgumentException("Invalid message type for fanout: " + msg.type));
+                FargsClient.LOGGER.error("Invalid message type for fanout: " + msg.data.type, new IllegalArgumentException("Invalid message type for fanout: " + msg.data.type));
                 break;
         }
     }
 
     private void directMessageHandler(String consumerTag, Delivery delivery) {
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        Message<Object> msg = deserializeData(message);
-        if (!Objects.equals(msg.from, "server")) {
-            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.from));
+        Packet<?> msg = deserializeData(message);
+        if (!Objects.equals(msg.pattern, clientId)) {
+            FargsClient.LOGGER.error("Incorrect message destination: " + msg.pattern, new IllegalArgumentException("Incorrect message destination: " + msg.pattern));
+            return;
         }
-        switch (msg.type) {
+        if (!Objects.equals(msg.data.from, "server")) {
+            FargsClient.LOGGER.error("Invalid message source for fanout: " + msg.data.from, new IllegalArgumentException("Invalid message source for fanout: " + msg.data.from));
+            return;
+        }
+        switch (msg.data.type) {
+            case DIMENSION_COMPLETE:
+                handleDimensionComplete();
+                break;
             case BLACKLIST:
                 handleBlacklistMessage(deserializeData(message));
                 break;
@@ -101,7 +109,7 @@ public class CommsManager {
                 handleUpdateAvailable(deserializeData(message));
                 break;
             default:
-                FargsClient.LOGGER.error("Invalid message type for direct: " + msg.type, new IllegalArgumentException("Invalid message type for direct: " + msg.type));
+                FargsClient.LOGGER.error("Invalid message type for direct: " + msg.data.type, new IllegalArgumentException("Invalid message type for direct: " + msg.data.type));
                 break;
         }
     }

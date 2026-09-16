@@ -5,6 +5,7 @@ import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.bibbythe.fargsclient.communication.types.datatypes.RegionRequestResponseData;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public interface CommunicationEvents {
@@ -28,7 +29,7 @@ public interface CommunicationEvents {
 
     Event<blocklistUpdated> BLOCKLIST_UPDATED = EventFactory.createLoop();
     interface blocklistUpdated {
-        void onUpdatedBlocklist(Map<String, String[]> updatedBlocklist);
+        void onUpdatedBlocklist(Map<String, ArrayList<String>> updatedBlocklist);
     }
 
     Event<regionRequestResponseReceived> REGION_REQUEST_RESPONSE_RECEIVED = EventFactory.createLoop();
@@ -39,5 +40,10 @@ public interface CommunicationEvents {
     Event<updateAvailable> UPDATE_AVAILABLE = EventFactory.createLoop();
     interface updateAvailable {
         void onUpdateAvailable(String version);
+    }
+
+    Event<dimensionComplete> DIMENSION_COMPLETE = EventFactory.createLoop();
+    interface dimensionComplete {
+        void onDimensionComplete();
     }
 }

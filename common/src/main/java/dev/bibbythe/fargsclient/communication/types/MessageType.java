@@ -9,5 +9,7 @@ public enum MessageType implements Serializable {
     REGION_REQUEST,
     REGION_REQUEST_RESPONSE,
     SCAN_RESULT,
-    UPDATE_AVAILABLE
+    UPDATE_AVAILABLE,
+    DIMENSION_COMPLETE,
+    REGION_COMPLETE,
 }
