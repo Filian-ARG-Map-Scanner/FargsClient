@@ -15,7 +15,7 @@ public class CommsFanoutSub {
     public CommsFanoutSub(CommsConnection commsConnection) {
         try {
             this.rabbitmqChannel = commsConnection.createChannel();
-            rabbitmqChannel.exchangeDeclare(FargsClient.config.fanoutExchangeName, "fanout");
+            rabbitmqChannel.exchangeDeclare(FargsClient.config.fanoutExchangeName, "fanout", true);
         } catch (IOException e) {
             FargsClient.LOGGER.error("Error while creating RabbitMQ exchange", e);
             throw new RuntimeException(e);

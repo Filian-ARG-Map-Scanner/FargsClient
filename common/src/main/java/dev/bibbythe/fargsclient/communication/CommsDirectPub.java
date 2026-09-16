@@ -13,7 +13,7 @@ public class CommsDirectPub {
     public CommsDirectPub(CommsConnection commsConnection) {
         try {
             this.rabbitmqChannel = commsConnection.createChannel();
-            rabbitmqChannel.exchangeDeclare(FargsClient.config.directExchangeName, "direct");
+            rabbitmqChannel.exchangeDeclare(FargsClient.config.directExchangeName, "direct", true);
         } catch (IOException e) {
             FargsClient.LOGGER.error("Error while creating RabbitMQ exchange", e);
             throw new RuntimeException(e);
