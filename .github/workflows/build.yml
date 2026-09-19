@@ -83,6 +83,8 @@ jobs:
   create-release:
     runs-on: pve-cluster-runners-dind
     needs: build
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
