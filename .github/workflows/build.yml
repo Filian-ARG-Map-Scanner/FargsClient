@@ -83,7 +83,7 @@ jobs:
       - name: Upload fabric jar
         uses: actions/upload-artifact@v7
         with:
-          name: fabric_jar
+          name: jars
           path: |
             fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
             neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
@@ -100,11 +100,7 @@ jobs:
       - name: Download fabric jar
         uses: actions/download-artifact@v8
         with:
-          name: fabric_jar
-      - name: Download neoforge jar
-        uses: actions/download-artifact@v8
-        with:
-          name: neoforge_jar
+          name: jars
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
