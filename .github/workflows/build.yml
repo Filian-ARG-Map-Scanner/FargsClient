@@ -67,6 +67,28 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build -Pmod_version=${{steps.version_step.outputs.fullSemVer}} -Pfabric_bundle_uuid=${{ steps.fabric_bundle_uuid.outputs.uuid }} -Pneoforge_bundle_uuid=${{ steps.neoforge_bundle_uuid.outputs.uuid }} -Pcommon_bundle_uuid=${{ steps.common_bundle_uuid.outputs.uuid }}
+      - name: Upload fabric jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric
+          path: fabric/build/libs/fargs-client-fabric-${{steps.version_step.outputs.fullSemVer}}.jar
+      - name: Upload neoforge jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: neoforge
+          path: neoforge/build/libs/fargs-client-neoforge-${{steps.version_step.outputs.fullSemVer}}.jar
+  create-release:
+    runs-on: pve-cluster-runners-dind
+    needs: build
+    steps:
+      - name: Download fabric jar
+        uses: actions/download-artifact@v5
+        with:
+          name: fabric_jar
+      - name: Download neoforge jar
+        uses: actions/download-artifact@v5
+        with:
+          name: neoforge_jar
       - name: Create Sentry release
         uses: getsentry/action-release@v3
         env:
