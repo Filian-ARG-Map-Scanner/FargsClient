@@ -127,5 +127,5 @@ jobs:
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: |
-            fargs-client-fabric-${{needs.version.outputs.version}}.jar
-            fargs-client-neoforge-${{needs.version.outputs.version}}.jar
+            fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
+            neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
