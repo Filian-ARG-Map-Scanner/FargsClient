@@ -84,12 +84,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: fabric_jar
-          path: fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
-      - name: Upload neoforge jar
-        uses: actions/upload-artifact@v7
-        with:
-          name: neoforge_jar
-          path: neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
+          path: |
+            fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
+            neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
   create-release:
     runs-on: pve-cluster-runners-dind
     needs:
