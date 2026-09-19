@@ -6,8 +6,10 @@ on:
     branches:
       - master
 jobs:
-  build:
+  version:
     runs-on: pve-cluster-runners
+    outputs:
+      version: ${{steps.version_step.outputs.semver}}
     permissions:
       contents: write
     steps:
@@ -28,7 +30,15 @@ jobs:
         id: version_step # step id used as reference for output values
         uses: gittools/actions/gitversion/execute@v4.7.0
       - name: Set Version
-        run: echo "VERSION=${{ steps.version_step.outputs.semVer }}" >> $GITHUB_ENV
+        run: echo "SEMVER=${{ steps.version_step.outputs.semVer }}" >> $GITHUB_OUTPUT
+  build:
+    runs-on: pve-cluster-runners
+    needs: version
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
@@ -65,7 +75,7 @@ jobs:
           job-id: jdk21
           arguments: |
             build
-            -Pmod_version=${{steps.version_step.outputs.fullSemVer}}
+            -Pmod_version=${{needs.version.outputs.version}}
             -Pfabric_bundle_uuid=${{ steps.fabric_bundle_uuid.outputs.uuid }}
             -Pneoforge_bundle_uuid=${{ steps.neoforge_bundle_uuid.outputs.uuid }}
             -Pcommon_bundle_uuid=${{ steps.common_bundle_uuid.outputs.uuid }}
@@ -74,15 +84,17 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: fabric_jar
-          path: fabric/build/libs/fargs-client-fabric-${{steps.version_step.outputs.fullSemVer}}.jar
+          path: fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
       - name: Upload neoforge jar
         uses: actions/upload-artifact@v7
         with:
           name: neoforge_jar
-          path: neoforge/build/libs/fargs-client-neoforge-${{steps.version_step.outputs.fullSemVer}}.jar
+          path: neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
   create-release:
     runs-on: pve-cluster-runners-dind
-    needs: build
+    needs:
+      - version
+      - build
     permissions:
       contents: write
     steps:
@@ -104,7 +116,7 @@ jobs:
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
         with:
           environment: production
-          release: ${{steps.version_step.outputs.fullSemVer}}
+          release: ${{needs.version.outputs.version}}
       - name: Create tag
         uses: actions/github-script@v9
         with:
@@ -112,15 +124,15 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{steps.version_step.outputs.fullSemVer}}',
+              ref: 'refs/tags/${{needs.version.outputs.version}}',
               sha: context.sha
             })
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{steps.version_step.outputs.fullSemVer}}
+          tag_name: ${{needs.version.outputs.version}}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: |
-            fabric/build/libs/fargs-client-fabric-${{steps.version_step.outputs.fullSemVer}}.jar
-            neoforge/build/libs/fargs-client-neoforge-${{steps.version_step.outputs.fullSemVer}}.jar
+            fabric/build/libs/fargs-client-fabric-${{needs.version.outputs.version}}.jar
+            neoforge/build/libs/fargs-client-neoforge-${{needs.version.outputs.version}}.jar
